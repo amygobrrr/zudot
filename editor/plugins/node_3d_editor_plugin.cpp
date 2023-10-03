@@ -232,11 +232,11 @@ void ViewportNavigationControl::_update_navigation() {
 
 			Vector3 forward;
 			if (navigation_scheme == Node3DEditorViewport::FreelookNavigationScheme::FREELOOK_FULLY_AXIS_LOCKED) {
-				// Forward/backward keys will always go straight forward/backward, never moving on the Y axis.
-				forward = Vector3(0, 0, delta_normalized.y).rotated(Vector3(0, 1, 0), viewport->camera->get_rotation().y);
+				// Forward/backward keys will always go straight forward/backward, never moving on the Z axis.
+				forward = Vector3(0, delta_normalized.y, 0).rotated(Vector3(0, 0, 1), viewport->camera->get_rotation().z);
 			} else {
 				// Forward/backward keys will be relative to the camera pitch.
-				forward = viewport->camera->get_transform().basis.xform(Vector3(0, 0, delta_normalized.y));
+				forward = viewport->camera->get_transform().basis.xform(Vector3(0, delta_normalized.y, 0));
 			}
 
 			const Vector3 right = viewport->camera->get_transform().basis.xform(Vector3(delta_normalized.x, 0, 0));
@@ -537,7 +537,7 @@ void Node3DEditorViewport::_update_camera(real_t p_interp_delta) {
 				camera_cursor.y_rot = cursor.y_rot;
 			}
 
-			Vector3 forward = to_camera_transform(camera_cursor).basis.xform(Vector3(0, 0, -1));
+			Vector3 forward = to_camera_transform(camera_cursor).basis.xform(Vector3(0, 1, 0));
 			camera_cursor.pos = camera_cursor.eye_pos + forward * camera_cursor.distance;
 
 		} else {
@@ -599,7 +599,7 @@ Transform3D Node3DEditorViewport::to_camera_transform(const Cursor &p_cursor) co
 	Transform3D camera_transform;
 	camera_transform.translate_local(p_cursor.pos);
 	camera_transform.basis.rotate(Vector3(1, 0, 0), -p_cursor.x_rot);
-	camera_transform.basis.rotate(Vector3(0, 1, 0), -p_cursor.y_rot);
+	camera_transform.basis.rotate(Vector3(0, 0, 1), -p_cursor.y_rot);
 
 	if (orthogonal) {
 		camera_transform.translate_local(0, 0, (get_zfar() - get_znear()) / 2.0);
@@ -894,7 +894,7 @@ Vector3 Node3DEditorViewport::_get_screen_to_space(const Vector3 &p_vector3) {
 	Transform3D camera_transform;
 	camera_transform.translate_local(cursor.pos);
 	camera_transform.basis.rotate(Vector3(1, 0, 0), -cursor.x_rot);
-	camera_transform.basis.rotate(Vector3(0, 1, 0), -cursor.y_rot);
+	camera_transform.basis.rotate(Vector3(0, 0, 1), -cursor.y_rot);
 	camera_transform.translate_local(0, 0, cursor.distance);
 
 	return camera_transform.xform(Vector3(((p_vector3.x / get_size().width) * 2.0 - 1.0) * screen_he.x, ((1.0 - (p_vector3.y / get_size().height)) * 2.0 - 1.0) * screen_he.y, -(get_znear() + p_vector3.z)));
@@ -2384,7 +2384,7 @@ void Node3DEditorViewport::_nav_pan(Ref<InputEventWithModifiers> p_event, const 
 
 	camera_transform.translate_local(cursor.pos);
 	camera_transform.basis.rotate(Vector3(1, 0, 0), -cursor.x_rot);
-	camera_transform.basis.rotate(Vector3(0, 1, 0), -cursor.y_rot);
+	camera_transform.basis.rotate(Vector3(0, 0, 1), -cursor.y_rot);
 	const bool invert_x_axis = EDITOR_GET("editors/3d/navigation/invert_x_axis");
 	const bool invert_y_axis = EDITOR_GET("editors/3d/navigation/invert_y_axis");
 	Vector3 translation(
@@ -2497,7 +2497,7 @@ void Node3DEditorViewport::set_freelook_active(bool active_now) {
 		cursor = camera_cursor;
 
 		// Make sure eye_pos is synced, because freelook referential is eye pos rather than orbit pos
-		Vector3 forward = to_camera_transform(cursor).basis.xform(Vector3(0, 0, -1));
+		Vector3 forward = to_camera_transform(cursor).basis.xform(Vector3(0, 1, 0));
 		cursor.eye_pos = cursor.pos - cursor.distance * forward;
 		// Also sync the camera cursor, otherwise switching to freelook will be trippy if inertia is active
 		camera_cursor.eye_pos = cursor.eye_pos;
@@ -2590,11 +2590,11 @@ void Node3DEditorViewport::_update_freelook(real_t delta) {
 
 	Vector3 forward;
 	if (navigation_scheme == FREELOOK_FULLY_AXIS_LOCKED) {
-		// Forward/backward keys will always go straight forward/backward, never moving on the Y axis.
-		forward = Vector3(0, 0, -1).rotated(Vector3(0, 1, 0), camera->get_rotation().y);
+		// Forward/backward keys will always go straight forward/backward, never moving on the Z axis.
+		forward = Vector3(0, 1, 0).rotated(Vector3(0, 0, 1), camera->get_rotation().z);
 	} else {
 		// Forward/backward keys will be relative to the camera pitch.
-		forward = camera->get_transform().basis.xform(Vector3(0, 0, -1));
+		forward = camera->get_transform().basis.xform(Vector3(0, 1, 0));
 	}
 
 	const Vector3 right = camera->get_transform().basis.xform(Vector3(1, 0, 0));
@@ -2602,10 +2602,10 @@ void Node3DEditorViewport::_update_freelook(real_t delta) {
 	Vector3 up;
 	if (navigation_scheme == FREELOOK_PARTIALLY_AXIS_LOCKED || navigation_scheme == FREELOOK_FULLY_AXIS_LOCKED) {
 		// Up/down keys will always go up/down regardless of camera pitch.
-		up = Vector3(0, 1, 0);
+		up = Vector3(0, 0, 1);
 	} else {
 		// Up/down keys will be relative to the camera pitch.
-		up = camera->get_transform().basis.xform(Vector3(0, 1, 0));
+		up = camera->get_transform().basis.xform(Vector3(0, 0, 1));
 	}
 
 	Vector3 direction;
@@ -8669,7 +8669,7 @@ void fragment() {
 )");
 		sun_direction_material.instantiate();
 		sun_direction_material->set_shader(sun_direction_shader);
-		sun_direction_material->set_shader_parameter("sun_direction", Vector3(0, 0, 1));
+		sun_direction_material->set_shader_parameter("sun_direction", Vector3(0, -1, 0));
 		sun_direction_material->set_shader_parameter("sun_color", Vector3(1, 1, 1));
 		sun_direction->set_material(sun_direction_material);
 

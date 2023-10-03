@@ -1,3 +1,20 @@
+# Zudot
+## A Z-up fork of the Godot game engine
+
+<span style='color:#FF5000'>**+X**</span>: right
+
+<span style='color:#00A050'>**+Y**</span>: forward
+
+<span style='color:#0050FF'>**+Z**</span>: up
+
+Everything else is unchanged.
+
+-----------
+
+Original Godot readme:
+
+-----------
+
 # Godot Engine
 
 <p align="center">
