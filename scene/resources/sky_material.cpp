@@ -282,7 +282,7 @@ uniform float sun_angle_max = 30.0;
 uniform float sun_curve : hint_range(0, 1) = 0.15;
 
 void sky() {
-	float v_angle = acos(clamp(EYEDIR.y, -1.0, 1.0));
+	float v_angle = acos(clamp(EYEDIR.z, -1.0, 1.0));
 	float c = (1.0 - v_angle / (PI * 0.5));
 	vec3 sky = mix(sky_horizon_color.rgb, sky_top_color.rgb, clamp(1.0 - pow(1.0 - c, 1.0 / sky_curve), 0.0, 1.0));
 	sky *= sky_energy;
@@ -334,7 +334,7 @@ void sky() {
 	vec3 ground = mix(ground_horizon_color.rgb, ground_bottom_color.rgb, clamp(1.0 - pow(1.0 - c, 1.0 / ground_curve), 0.0, 1.0));
 	ground *= ground_energy;
 
-	COLOR = mix(ground, sky, step(0.0, EYEDIR.y));
+	COLOR = mix(ground, sky, step(0.0, EYEDIR.z));
 }
 )",
 																		  i ? "render_mode use_debanding;" : ""));

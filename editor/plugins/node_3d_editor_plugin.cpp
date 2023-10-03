@@ -2263,13 +2263,15 @@ void Node3DEditorViewport::_sinput(const Ref<InputEvent> &p_event) {
 		}
 		if (ED_IS_SHORTCUT("spatial_editor/orbit_view_down", p_event)) {
 			// Clamp rotation to roughly -90..90 degrees so the user can't look upside-down and end up disoriented.
-			cursor.x_rot = CLAMP(cursor.x_rot - Math_PI / 12.0, -1.57, 1.57);
+			// Offset by -pi/2 to account for swapped axes.
+			cursor.x_rot = CLAMP(cursor.x_rot - Math_PI / 12.0, -3.14, 0.0);
 			view_type = VIEW_TYPE_USER;
 			_update_name();
 		}
 		if (ED_IS_SHORTCUT("spatial_editor/orbit_view_up", p_event)) {
 			// Clamp rotation to roughly -90..90 degrees so the user can't look upside-down and end up disoriented.
-			cursor.x_rot = CLAMP(cursor.x_rot + Math_PI / 12.0, -1.57, 1.57);
+			// Offset by -pi/2 to account for swapped axes.
+			cursor.x_rot = CLAMP(cursor.x_rot + Math_PI / 12.0, -3.14, 0.0);
 			view_type = VIEW_TYPE_USER;
 			_update_name();
 		}
@@ -2441,7 +2443,8 @@ void Node3DEditorViewport::_nav_orbit(Ref<InputEventWithModifiers> p_event, cons
 		cursor.x_rot += p_relative.y * radians_per_pixel;
 	}
 	// Clamp the Y rotation to roughly -90..90 degrees so the user can't look upside-down and end up disoriented.
-	cursor.x_rot = CLAMP(cursor.x_rot, -1.57, 1.57);
+	// Offset by -pi/2 to account for swapped axes.
+	cursor.x_rot = CLAMP(cursor.x_rot, -3.14, 0.0);
 
 	if (invert_x_axis) {
 		cursor.y_rot -= p_relative.x * radians_per_pixel;
@@ -2476,7 +2479,8 @@ void Node3DEditorViewport::_nav_look(Ref<InputEventWithModifiers> p_event, const
 		cursor.x_rot += p_relative.y * radians_per_pixel;
 	}
 	// Clamp the Y rotation to roughly -90..90 degrees so the user can't look upside-down and end up disoriented.
-	cursor.x_rot = CLAMP(cursor.x_rot, -1.57, 1.57);
+	// Offset by -pi/2 to account for swapped axes.
+	cursor.x_rot = CLAMP(cursor.x_rot, -3.14, 0.0);
 
 	cursor.y_rot += p_relative.x * radians_per_pixel;
 
@@ -8062,7 +8066,7 @@ void Node3DEditor::_preview_settings_changed() {
 
 	{ // preview sun
 		Transform3D t;
-		t.basis = Basis::from_euler(Vector3(sun_rotation.x, sun_rotation.y, 0));
+		t.basis = Basis::from_euler(Vector3(0, -sun_rotation.x, sun_rotation.y), EulerOrder::ZXY);
 		preview_sun->set_transform(t);
 		sun_direction->queue_redraw();
 		preview_sun->set_param(Light3D::PARAM_ENERGY, sun_energy->get_value());
